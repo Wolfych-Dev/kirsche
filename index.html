@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Kirsche Messenger Mobile & PC</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+
+    <style>
+        :root[data-theme="kirsche-dark"] {
+            --bg-main: #0b0c10; --card-bg: #12141d; --header-bg: rgba(10, 11, 16, 0.95);
+            --border: rgba(255, 255, 255, 0.1); --accent: #ff2a54; --accent-hover: #e01e43;
+            --accent-glow: rgba(255, 42, 84, 0.35); --bubble-peer: #1a1d28; --bubble-me: #ff2a54;
+            --text-main: #f8fafc; --text-muted: #64748b; --input-bg: rgba(255, 255, 255, 0.05);
+            --drawer-bg: #0f111a; --tag-bg: rgba(255, 42, 84, 0.15);
+        }
+
+        :root[data-theme="kirsche-midnight"] {
+            --bg-main: #0a0e17; --card-bg: #101726; --header-bg: rgba(12, 18, 31, 0.95);
+            --border: rgba(255, 255, 255, 0.1); --accent: #2563eb; --accent-hover: #1d4ed8;
+            --accent-glow: rgba(37, 99, 235, 0.35); --bubble-peer: #172136; --bubble-me: #2563eb;
+            --text-main: #f8fafc; --text-muted: #64748b; --input-bg: rgba(255, 255, 255, 0.05);
+            --drawer-bg: #0d1320; --tag-bg: rgba(37, 99, 235, 0.15);
+        }
+
+        :root[data-theme="kirsche-cyberpunk"] {
+            --bg-main: #05050a; --card-bg: #0d0d18; --header-bg: #121225;
+            --border: #f3ea00; --accent: #ff0055; --accent-hover: #d60047;
+            --accent-glow: rgba(255, 0, 85, 0.5); --bubble-peer: #18182a; --bubble-me: #f3ea00;
+            --text-main: #ffffff; --text-muted: #00f0ff; --input-bg: rgba(0, 240, 255, 0.05);
+            --drawer-bg: #080812; --tag-bg: rgba(0, 240, 255, 0.15);
+        }
+
+        :root[data-theme="kirsche-emerald"] {
+            --bg-main: #06120e; --card-bg: #0b1e18; --header-bg: rgba(8, 24, 19, 0.95);
+            --border: rgba(255, 255, 255, 0.1); --accent: #10b981; --accent-hover: #059669;
+            --accent-glow: rgba(16, 185, 129, 0.35); --bubble-peer: #122c23; --bubble-me: #10b981;
+            --text-main: #f8fafc; --text-muted: #64748b; --input-bg: rgba(255, 255, 255, 0.05);
+            --drawer-bg: #081712; --tag-bg: rgba(16, 185, 129, 0.15);
+        }
+
+        :root[data-theme="kirsche-amethyst"] {
+            --bg-main: #0f0914; --card-bg: #180d24; --header-bg: rgba(24, 13, 36, 0.95);
+            --border: rgba(255, 255, 255, 0.1); --accent: #a855f7; --accent-hover: #9333ea;
+            --accent-glow: rgba(168, 85, 247, 0.35); --bubble-peer: #231336; --bubble-me: #a855f7;
+            --text-main: #f8fafc; --text-muted: #8b5cf6; --input-bg: rgba(255, 255, 255, 0.05);
+            --drawer-bg: #12091c; --tag-bg: rgba(168, 85, 247, 0.15);
+        }
+
+        :root[data-theme="kirsche-sunset"] {
+            --bg-main: #140a08; --card-bg: #21110c; --header-bg: rgba(33, 17, 12, 0.95);
+            --border: rgba(255, 255, 255, 0.1); --accent: #f97316; --accent-hover: #ea580c;
+            --accent-glow: rgba(249, 115, 22, 0.35); --bubble-peer: #2e1812; --bubble-me: #f97316;
+            --text-main: #f8fafc; --text-muted: #fb923c; --input-bg: rgba(255, 255, 255, 0.05);
+            --drawer-bg: #1a0d0a; --tag-bg: rgba(249, 115, 22, 0.15);
+        }
+
+        :root[data-theme="kirsche-nord"] {
+            --bg-main: #181b22; --card-bg: #222630; --header-bg: rgba(34, 38, 48, 0.95);
+            --border: rgba(255, 255, 255, 0.1); --accent: #3b82f6; --accent-hover: #2563eb;
+            --accent-glow: rgba(59, 130, 246, 0.35); --bubble-peer: #2d3342; --bubble-me: #3b82f6;
+            --text-main: #f8fafc; --text-muted: #94a3b8; --input-bg: rgba(255, 255, 255, 0.05);
+            --drawer-bg: #1c2029; --tag-bg: rgba(59, 130, 246, 0.15);
+        }
+
+        * {
+            box-sizing: border-box; margin: 0; padding: 0;
+            font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            height: 100%; width: 100%; overflow: hidden;
+            background-color: var(--bg-main); color: var(--text-main);
+        }
+
+        body { display: flex; justify-content: center; align-items: center; }
+
+        .chat-card {
+            width: 100%; max-width: 1100px;
+            height: 100dvh; max-height: 100dvh;
+            background: var(--card-bg);
+            display: flex; flex-direction: column;
+            overflow: hidden; position: relative;
+        }
+
+        @media (min-width: 769px) {
+            .chat-card {
+                height: 92vh; max-height: 900px;
+                border: 1px solid var(--border); border-radius: 24px;
+                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+            }
+        }
+
+        .header {
+            padding: 10px 16px; background: var(--header-bg);
+            border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 5; flex-shrink: 0;
+        }
+
+        .brand { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+        .brand-avatar {
+            width: 38px; height: 38px; background: var(--input-bg);
+            border: 1px solid var(--border); border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+        }
+        .brand-info h1 { font-size: 0.95rem; font-weight: 700; line-height: 1.1; }
+        .brand-info span { font-size: 0.7rem; color: var(--text-muted); }
+
+        .theme-select {
+            background: var(--input-bg); color: var(--text-main);
+            border: 1px solid var(--border); border-radius: 8px;
+            padding: 6px 8px; font-size: 0.75rem; outline: none;
+        }
+
+        /* Drawer Профиля */
+        .drawer-overlay {
+            position: absolute; inset: 0; background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px); z-index: 10; opacity: 0; pointer-events: none; transition: 0.3s;
+        }
+        .drawer-overlay.open { opacity: 1; pointer-events: auto; }
+
+        .drawer {
+            position: absolute; top: 0; left: -100%; bottom: 0;
+            width: 85%; max-width: 340px; background: var(--drawer-bg);
+            border-right: 1px solid var(--border); z-index: 11;
+            transition: left 0.3s ease; display: flex; flex-direction: column;
+            padding: 20px; overflow-y: auto;
+        }
+        .drawer.open { left: 0; }
+        .drawer-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .drawer-title { font-size: 1rem; font-weight: 700; }
+        .close-btn { background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer; }
+
+        .profile-section { display: flex; flex-direction: column; gap: 10px; }
+        .section-label { font-size: 0.7rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-top: 4px; }
+
+        input, textarea {
+            background: var(--input-bg); border: 1px solid var(--border);
+            border-radius: 10px; padding: 8px 12px; color: var(--text-main);
+            font-size: 0.85rem; outline: none; width: 100%; resize: none;
+        }
+
+        .tags-container { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 2px; }
+        .tag-chip {
+            background: var(--tag-bg); border: 1px solid var(--border);
+            color: var(--text-main); padding: 2px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 600;
+        }
+
+        /* Connect Bar */
+        .connect-bar {
+            padding: 8px 12px; background: rgba(0, 0, 0, 0.25);
+            border-bottom: 1px solid var(--border); display: flex; flex-direction: column; gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .connect-row { display: flex; gap: 6px; width: 100%; align-items: center; }
+        .room-row {
+            flex: 1; display: flex; align-items: center; justify-content: space-between;
+            background: var(--input-bg); border: 1px solid var(--border);
+            border-radius: 8px; padding: 6px 10px;
+        }
+
+        .code-display { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; font-weight: 700; }
+
+        .btn {
+            background: var(--accent); color: #fff; border: none; border-radius: 8px;
+            padding: 6px 12px; font-size: 0.78rem; font-weight: 600; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 4px;
+            box-shadow: 0 2px 8px var(--accent-glow); white-space: nowrap;
+        }
+
+        .btn-sec { background: var(--input-bg); color: var(--text-main); border: 1px solid var(--border); box-shadow: none; padding: 4px 8px; font-size: 0.72rem; }
+        .btn:disabled, .call-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+
+        /* Выезжающая шторка Стримов / Голоса */
+        .stream-drawer-toggle {
+            position: absolute; right: 0; top: 110px; z-index: 9;
+            background: var(--accent); color: #fff; border: none;
+            padding: 10px 6px; border-top-left-radius: 12px; border-bottom-left-radius: 12px;
+            cursor: pointer; box-shadow: -2px 0 10px rgba(0,0,0,0.5); font-weight: bold; font-size: 0.75rem;
+            display: flex; align-items: center; gap: 4px; writing-mode: vertical-rl; text-orientation: mixed;
+        }
+
+        .stream-panel {
+            position: absolute; right: -100%; top: 0; bottom: 0; width: 100%; max-width: 400px;
+            background: var(--drawer-bg); border-left: 1px solid var(--border);
+            z-index: 12; transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column;
+            padding: 14px; gap: 10px; box-shadow: -5px 0 25px rgba(0,0,0,0.7);
+        }
+        .stream-panel.open { right: 0; }
+
+        /* Мини-режим (Плавающее видео) */
+        .stream-panel.pip-mode {
+            top: auto; bottom: 70px; right: 12px !important; width: 220px; height: 160px;
+            border-radius: 16px; border: 1px solid var(--border); padding: 6px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8); z-index: 15;
+        }
+        .stream-panel.pip-mode .stream-panel-header h3,
+        .stream-panel.pip-mode .media-control-bar { display: none; }
+
+        .stream-panel-header { display: flex; justify-content: space-between; align-items: center; }
+
+        .stream-video-box {
+            position: relative; flex: 1; width: 100%; min-height: 200px;
+            background: #000; border-radius: 12px; overflow: hidden;
+            border: 1px solid var(--border); display: flex; justify-content: center; align-items: center;
+        }
+
+        .stream-video-box video { width: 100%; height: 100%; object-fit: contain; }
+
+        /* Оверлей управления поверх видео */
+        .video-overlay-controls {
+            position: absolute; top: 8px; right: 8px; display: flex; gap: 6px; z-index: 2;
+        }
+
+        .icon-btn-small {
+            background: rgba(0,0,0,0.6); color: #fff; border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 0.85rem; backdrop-filter: blur(4px);
+        }
+
+        .media-control-bar { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+
+        .call-btn {
+            width: 100%; padding: 10px 12px; border-radius: 10px; font-size: 0.8rem; font-weight: 600;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            border: 1px solid var(--border); background: var(--input-bg); color: var(--text-main); cursor: pointer;
+        }
+
+        .call-btn.active { background: #10b981; color: #fff; border-color: #10b981; }
+        .call-btn.muted { background: #f59e0b; color: #fff; border-color: #f59e0b; }
+        .call-btn.danger { background: #ff2a54; color: #fff; border-color: #ff2a54; }
+
+        /* Workspace */
+        .main-workspace { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+
+        /* Чат */
+        .chat-section { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; height: 100%; }
+        .chat-body { flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+
+        .sys-info {
+            align-self: center; font-size: 0.7rem; color: var(--text-muted);
+            background: var(--input-bg); border: 1px solid var(--border);
+            padding: 3px 10px; border-radius: 12px; text-align: center; max-width: 90%;
+        }
+
+        .msg-wrapper { display: flex; gap: 8px; max-width: 85%; }
+        .msg-wrapper.me { align-self: flex-end; flex-direction: row-reverse; }
+        .msg-wrapper.peer { align-self: flex-start; }
+
+        .msg-avatar {
+            width: 32px; height: 32px; border-radius: 10px;
+            background: var(--input-bg); border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem; flex-shrink: 0; cursor: pointer;
+        }
+
+        .msg-content { display: flex; flex-direction: column; }
+        .msg-author { font-size: 0.65rem; color: var(--text-muted); margin-bottom: 2px; padding: 0 2px; }
+        .msg-wrapper.me .msg-author { text-align: right; }
+
+        .bubble { padding: 8px 12px; font-size: 0.85rem; line-height: 1.4; border-radius: 14px; word-break: break-word; }
+        .msg-wrapper.me .bubble { background: var(--bubble-me); color: #fff; border-bottom-right-radius: 2px; box-shadow: 0 2px 8px var(--accent-glow); }
+        .msg-wrapper.peer .bubble { background: var(--bubble-peer); color: var(--text-main); border: 1px solid var(--border); border-bottom-left-radius: 2px; }
+
+        :root[data-theme="kirsche-cyberpunk"] .bubble.me { color: #000; font-weight: 600; }
+
+        .media-bubble { background: transparent !important; box-shadow: none !important; padding: 0 !important; }
+        .media-img { max-width: 200px; max-height: 200px; border-radius: 10px; display: block; border: 1px solid var(--border); }
+
+        audio { max-width: 200px; height: 36px; border-radius: 18px; outline: none; }
+        .msg-time { font-size: 0.6rem; opacity: 0.65; margin-top: 3px; display: block; text-align: right; }
+
+        /* Media Picker */
+        .media-picker {
+            position: absolute; bottom: 65px; left: 10px; right: 10px;
+            height: 260px; background: var(--drawer-bg); border: 1px solid var(--border);
+            border-radius: 16px; display: none; flex-direction: column; z-index: 8;
+            box-shadow: 0 -5px 25px rgba(0,0,0,0.6); overflow: hidden;
+        }
+
+        @media (min-width: 769px) { .media-picker { width: 320px; left: 16px; right: auto; } }
+
+        .media-picker.open { display: flex; }
+        .picker-tabs { display: flex; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.2); }
+        .tab-btn { flex: 1; padding: 8px; background: none; border: none; color: var(--text-muted); font-size: 0.78rem; font-weight: 600; cursor: pointer; }
+        .tab-btn.active { color: var(--text-main); border-bottom: 2px solid var(--accent); }
+
+        .gif-search-bar { padding: 6px; border-bottom: 1px solid var(--border); }
+        .picker-content { flex: 1; padding: 8px; overflow-y: auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+        .sticker-item { font-size: 2rem; text-align: center; cursor: pointer; padding: 4px; border-radius: 8px; }
+        .sticker-item:hover { background: var(--input-bg); }
+
+        .gif-item { width: 100%; height: 75px; object-fit: cover; border-radius: 6px; cursor: pointer; border: 1px solid var(--border); }
+
+        /* Footer */
+        .chat-footer {
+            padding: 8px 12px; background: var(--header-bg); border-top: 1px solid var(--border);
+            display: flex; gap: 6px; align-items: center; flex-shrink: 0; z-index: 6;
+        }
+
+        .btn-icon {
+            width: 38px; height: 38px; background: var(--input-bg);
+            border: 1px solid var(--border); border-radius: 10px; color: var(--text-main);
+            font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .btn-icon.recording { background: #ff2a54 !important; animation: pulse 1s infinite alternate; }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.08); }
+        }
+
+        .btn-send { width: 38px; height: 38px; padding: 0; border-radius: 10px; font-size: 0.9rem; flex-shrink: 0; }
+
+        .modal {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.9);
+            width: 85%; max-width: 320px; background: var(--drawer-bg); border: 1px solid var(--border);
+            border-radius: 16px; padding: 16px; z-index: 20; opacity: 0; pointer-events: none; transition: 0.2s;
+        }
+        .modal.open { transform: translate(-50%, -50%) scale(1); opacity: 1; pointer-events: auto; }
+    </style>
+</head>
+<body>
+
+<div class="chat-card">
+    <!-- Выдвижной Профиль -->
+    <div id="drawerOverlay" class="drawer-overlay" onclick="toggleDrawer(false); toggleStreamPanel(false);"></div>
+    <div id="drawer" class="drawer">
+        <div class="drawer-header">
+            <div class="drawer-title">Мой Профиль</div>
+            <button class="close-btn" onclick="toggleDrawer(false)">✕</button>
+        </div>
+
+        <div class="profile-section">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <input id="avatarInput" style="width: 45px; text-align: center; font-size: 1.2rem;" value="🍒" maxlength="2" oninput="saveProfile()" />
+                <div>
+                    <div style="font-size: 0.78rem; font-weight: 600;">Эмодзи-Аватар</div>
+                    <div style="font-size: 0.65rem; color: var(--text-muted);">Любой эмодзи</div>
+                </div>
+            </div>
+
+            <div class="section-label">Имя пользователя</div>
+            <input id="nameInput" placeholder="Ваш ник..." maxlength="16" oninput="saveProfile()" />
+
+            <div class="section-label">О себе / Статус</div>
+            <textarea id="bioInput" rows="2" placeholder="Расскажите пару слов..." oninput="saveProfile()"></textarea>
+
+            <div class="section-label">Любимые игры (через запятую)</div>
+            <input id="gamesInput" placeholder="CS2, Minecraft..." oninput="saveProfile()" />
+            <div id="gamesTags" class="tags-container"></div>
+
+            <div class="section-label">Увлечения (через запятую)</div>
+            <input id="hobbiesInput" placeholder="Пайка, Linux..." oninput="saveProfile()" />
+            <div id="hobbiesTags" class="tags-container"></div>
+        </div>
+    </div>
+
+    <!-- Модалка профиля друга -->
+    <div id="modalOverlay" class="drawer-overlay" onclick="closeModal()"></div>
+    <div id="peerModal" class="modal">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+            <div id="modalAvatar" style="font-size: 1.8rem;">👤</div>
+            <div>
+                <div id="modalName" style="font-weight: 700;">Собеседник</div>
+                <div id="modalBio" style="font-size: 0.7rem; color: var(--text-muted);">Без статуса</div>
+            </div>
+        </div>
+        <div class="section-label">Любимые игры</div>
+        <div id="modalGames" class="tags-container" style="margin-bottom: 8px;"></div>
+        <div class="section-label">Увлечения</div>
+        <div id="modalHobbies" class="tags-container"></div>
+    </div>
+
+    <!-- Кнопка вызова боковой панели стрима -->
+    <button class="stream-drawer-toggle" onclick="toggleStreamPanel(true)">◀ СТРИМ</button>
+
+    <!-- Выдвижной Плеер / Голос -->
+    <div id="streamPanel" class="stream-panel">
+        <div class="stream-panel-header">
+            <h3 style="font-weight:700; font-size:0.95rem;">Трансляция & Голос</h3>
+            <button class="close-btn" onclick="toggleStreamPanel(false)">✕</button>
+        </div>
+
+        <div id="streamVideoBox" class="stream-video-box" ondblclick="toggleFullscreen()">
+            <div class="video-overlay-controls">
+                <button class="icon-btn-small" onclick="togglePipMode()" title="Свернуть в мини-окно">◇</button>
+                <button class="icon-btn-small" onclick="toggleFullscreen()" title="На весь экран">⛶</button>
+            </div>
+            <video id="remoteVideo" autoplay playsinline></video>
+            <audio id="remoteAudio" autoplay></audio>
+        </div>
+
+        <div class="media-control-bar">
+            <button id="voiceCallBtn" class="call-btn" disabled onclick="toggleVoiceCall()">📞 Войти в голосовой</button>
+            <button id="muteMicBtn" class="call-btn" style="display: none;" onclick="toggleMuteMic()">🎙️ Микр ВКЛ</button>
+            <button id="screenShareBtn" class="call-btn" disabled onclick="toggleScreenShare()">🖥️ Запустить трансляцию экрана</button>
+        </div>
+    </div>
+
+    <!-- Шапка -->
+    <div class="header">
+        <div class="brand" onclick="toggleDrawer(true)">
+            <div id="myHeaderAvatar" class="brand-avatar">🍒</div>
+            <div class="brand-info">
+                <h1 id="myHeaderName">Игрок</h1>
+                <span id="statusText">Подключение...</span>
+            </div>
+        </div>
+
+        <select id="themeSelect" class="theme-select" onchange="changeTheme(this.value)">
+            <option value="kirsche-dark">Kirsche Dark</option>
+            <option value="kirsche-midnight">Kirsche Midnight</option>
+            <option value="kirsche-cyberpunk">Cyberpunk</option>
+            <option value="kirsche-emerald">Emerald</option>
+            <option value="kirsche-amethyst">Amethyst</option>
+            <option value="kirsche-sunset">Sunset</option>
+            <option value="kirsche-nord">Nord</option>
+        </select>
+    </div>
+
+    <!-- Компактная панель подключения -->
+    <div class="connect-bar">
+        <div class="connect-row">
+            <div class="room-row">
+                <span style="font-size: 0.65rem; color: var(--text-muted);">КОД:</span>
+                <span id="myCodeDisplay" class="code-display">------</span>
+            </div>
+            <button class="btn btn-sec" onclick="copyCode()">Копировать</button>
+            <input id="peerCodeInput" placeholder="Код друга..." maxlength="6" style="font-family: 'JetBrains Mono', monospace; width: 90px;" />
+            <button id="connectBtn" class="btn" onclick="connectToPeer()">Войти</button>
+        </div>
+    </div>
+
+    <!-- Основная зона -->
+    <div class="main-workspace">
+        <div class="chat-section">
+            <div id="chatBody" class="chat-body">
+                <div class="sys-info">Нажмите на аватар сверху, чтобы открыть профиль.</div>
+            </div>
+
+            <div id="mediaPicker" class="media-picker">
+                <div class="picker-tabs">
+                    <button id="tabStickers" class="tab-btn active" onclick="switchMediaTab('stickers')">Стикеры</button>
+                    <button id="tabGifs" class="tab-btn" onclick="switchMediaTab('gifs')">GIFs</button>
+                </div>
+
+                <div id="gifSearchBar" class="gif-search-bar" style="display: none;">
+                    <input id="gifSearchInput" placeholder="Поиск гифок..." oninput="searchGifs(this.value)" />
+                </div>
+
+                <div id="pickerContent" class="picker-content"></div>
+            </div>
+
+            <div class="chat-footer">
+                <button id="mediaBtn" class="btn-icon" onclick="toggleMediaPicker()">😀</button>
+                <button id="voiceBtn" class="btn-icon" onclick="toggleVoiceRecording()" disabled>🎙️</button>
+                <input id="msgInput" placeholder="Сообщение..." disabled onkeydown="if(event.key==='Enter') sendMsg()" />
+                <button id="sendBtn" class="btn btn-send" onclick="sendMsg()" disabled>&#10148;</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let peer = null, conn = null, currentCall = null, callStream = null;
+    let voiceMediaRecorder = null, voiceAudioChunks = [], isVoiceRecording = false;
+    let isVoiceActive = false, isScreenSharing = false, isMicMuted = false;
+
+    let myProfile = {
+        name: 'Пилот',
+        avatar: '🍒',
+        bio: 'Кодим на JS и играем в танки 🚀',
+        games: ['CS2', 'Minecraft', 'Roblox'],
+        hobbies: ['Пайка', 'Arch Linux']
+    };
+
+    let peerProfile = { name: 'Собеседник', avatar: '👤', bio: '', games: [], hobbies: [] };
+
+    const STICKERS = ['🔥', '🍒', '💀', '🤡', '🚀', '👑', '⚡', '🤖', '🎮', '❤️', '🗿', '🐱'];
+    let currentMediaTab = 'stickers';
+
+    const myCode = String(Math.floor(100000 + Math.random() * 900000));
+    const fullPeerId = 'kirsche-v12-' + myCode;
+
+    document.getElementById('myCodeDisplay').innerText = myCode;
+
+    /* --- Полноэкранный режим и PIP --- */
+
+    function toggleFullscreen() {
+        const videoBox = document.getElementById('streamVideoBox');
+        if (!document.fullscreenElement) {
+            if (videoBox.requestFullscreen) {
+                videoBox.requestFullscreen();
+            } else if (videoBox.webkitRequestFullscreen) {
+                videoBox.webkitRequestFullscreen();
+            }
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        }
+    }
+
+    function togglePipMode() {
+        const panel = document.getElementById('streamPanel');
+        const overlay = document.getElementById('drawerOverlay');
+        panel.classList.toggle('pip-mode');
+        overlay.classList.remove('open');
+    }
+
+    /* --- Работа с микрофоном --- */
+    async function getAudioStream() {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            throw new Error("Ваш браузер или соединение (HTTP) блокирует доступ к микрофону.");
+        }
+        try {
+            return await navigator.mediaDevices.getUserMedia({
+                audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+                video: false
+            });
+        } catch (e) {
+            return await navigator.mediaDevices.getUserMedia({ audio: true });
+        }
+    }
+
+    /* --- LocalStorage & Профиль --- */
+
+    function loadSavedProfile() {
+        const savedTheme = localStorage.getItem('kirsche_theme_v12') || 'kirsche-dark';
+        document.getElementById('themeSelect').value = savedTheme;
+        changeTheme(savedTheme);
+
+        const savedData = localStorage.getItem('kirsche_user_profile_v12');
+        if (savedData) {
+            try { 
+                myProfile = JSON.parse(savedData); 
+            } catch(e) {}
+        }
+
+        document.getElementById('nameInput').value = myProfile.name || 'Пилот';
+        document.getElementById('avatarInput').value = myProfile.avatar || '🍒';
+        document.getElementById('bioInput').value = myProfile.bio || '';
+        document.getElementById('gamesInput').value = (myProfile.games || []).join(', ');
+        document.getElementById('hobbiesInput').value = (myProfile.hobbies || []).join(', ');
+
+        updateProfileUI();
+    }
+
+    function saveProfile() {
+        const nameVal = document.getElementById('nameInput').value;
+        myProfile.name = nameVal !== '' ? nameVal : 'Пилот';
+        
+        myProfile.avatar = document.getElementById('avatarInput').value.trim() || '🍒';
+        myProfile.bio = document.getElementById('bioInput').value.trim();
+
+        const gVal = document.getElementById('gamesInput').value;
+        myProfile.games = gVal ? gVal.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+        const hVal = document.getElementById('hobbiesInput').value;
+        myProfile.hobbies = hVal ? hVal.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+        localStorage.setItem('kirsche_user_profile_v12', JSON.stringify(myProfile));
+        updateProfileUI();
+
+        if (conn && conn.open) {
+            conn.send({ type: 'profile_sync', profile: myProfile });
+        }
+    }
+
+    function updateProfileUI() {
+        document.getElementById('myHeaderName').innerText = myProfile.name;
+        document.getElementById('myHeaderAvatar').innerText = myProfile.avatar;
+
+        renderTags('gamesTags', myProfile.games, '🎮');
+        renderTags('hobbiesTags', myProfile.hobbies, '⚡');
+    }
+
+    function changeTheme(themeName) {
+        document.documentElement.setAttribute('data-theme', themeName);
+        localStorage.setItem('kirsche_theme_v12', themeName);
+    }
+
+    /* --- Управление шторками --- */
+
+    function toggleDrawer(open) {
+        document.getElementById('drawer').classList.toggle('open', open);
+        document.getElementById('drawerOverlay').classList.toggle('open', open);
+    }
+
+    function toggleStreamPanel(open) {
+        const panel = document.getElementById('streamPanel');
+        panel.classList.remove('pip-mode');
+        panel.classList.toggle('open', open);
+        document.getElementById('drawerOverlay').classList.toggle('open', open);
+    }
+
+    function toggleMediaPicker() {
+        const picker = document.getElementById('mediaPicker');
+        picker.classList.toggle('open');
+        if (picker.classList.contains('open')) renderMediaContent();
+    }
+
+    function switchMediaTab(tab) {
+        currentMediaTab = tab;
+        document.getElementById('tabStickers').classList.toggle('active', tab === 'stickers');
+        document.getElementById('tabGifs').classList.toggle('active', tab === 'gifs');
+        document.getElementById('gifSearchBar').style.display = tab === 'gifs' ? 'block' : 'none';
+        renderMediaContent();
+    }
+
+    function renderMediaContent() {
+        const container = document.getElementById('pickerContent');
+        container.innerHTML = '';
+
+        if (currentMediaTab === 'stickers') {
+            container.style.gridTemplateColumns = 'repeat(4, 1fr)';
+            STICKERS.forEach(st => {
+                const item = document.createElement('div');
+                item.className = 'sticker-item';
+                item.innerText = st;
+                item.onclick = () => sendMedia('sticker', st);
+                container.appendChild(item);
+            });
+        } else {
+            searchGifs('cats');
+        }
+    }
+
+    let gifTimeout = null;
+    function searchGifs(query) {
+        clearTimeout(gifTimeout);
+        gifTimeout = setTimeout(async () => {
+            const container = document.getElementById('pickerContent');
+            container.style.gridTemplateColumns = 'repeat(2, 1fr)';
+            const q = query.trim() || 'trending';
+            const url = `https://tenor.googleapis.com/v2/search?q=${encodeURIComponent(q)}&key=LIVDSRZULELA&limit=12`;
+
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                container.innerHTML = '';
+
+                if (data.results && data.results.length > 0) {
+                    data.results.forEach(item => {
+                        const imgUrl = item.media_formats.tinygif.url;
+                        const img = document.createElement('img');
+                        img.className = 'gif-item';
+                        img.src = imgUrl;
+                        img.onclick = () => sendMedia('gif', imgUrl);
+                        container.appendChild(img);
+                    });
+                } else {
+                    container.innerHTML = '<div style="font-size:0.75rem; color:var(--text-muted); grid-column:span 2;">Ничего не найдено</div>';
+                }
+            } catch (err) {
+                container.innerHTML = '<div style="font-size:0.75rem; color:var(--text-muted); grid-column:span 2;">Ошибка загрузки GIFs</div>';
+            }
+        }, 300);
+    }
+
+    /* --- Голос и Экран --- */
+
+    async function toggleVoiceCall() {
+        const btn = document.getElementById('voiceCallBtn');
+        const muteBtn = document.getElementById('muteMicBtn');
+
+        if (!isVoiceActive) {
+            try {
+                callStream = await getAudioStream();
+                currentCall = peer.call(conn.peer, callStream);
+                handleCallStream(currentCall);
+
+                isVoiceActive = true;
+                btn.innerText = '🔴 Сбросить голос';
+                btn.className = 'call-btn danger';
+                
+                muteBtn.style.display = 'flex';
+                isMicMuted = false;
+                updateMuteBtnState();
+
+                addSysMsg('Подключено к голосовому каналу.');
+            } catch (err) {
+                alert('Ошибка доступа к микрофону: ' + (err.message || 'Проверьте разрешения браузера'));
+            }
+        } else {
+            endCall();
+        }
+    }
+
+    function toggleMuteMic() {
+        if (callStream && callStream.getAudioTracks().length > 0) {
+            isMicMuted = !isMicMuted;
+            callStream.getAudioTracks()[0].enabled = !isMicMuted;
+            updateMuteBtnState();
+        }
+    }
+
+    function updateMuteBtnState() {
+        const muteBtn = document.getElementById('muteMicBtn');
+        if (isMicMuted) {
+            muteBtn.innerText = '🔇 Микр ВЫКЛ';
+            muteBtn.className = 'call-btn muted';
+        } else {
+            muteBtn.innerText = '🎙️ Микр ВКЛ';
+            muteBtn.className = 'call-btn active';
+        }
+    }
+
+    async function toggleScreenShare() {
+        const btn = document.getElementById('screenShareBtn');
+        if (!isScreenSharing) {
+            try {
+                callStream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true });
+                currentCall = peer.call(conn.peer, callStream);
+                handleCallStream(currentCall);
+
+                callStream.getVideoTracks()[0].onended = () => endCall();
+                isScreenSharing = true;
+                btn.innerText = '🔴 Стоп эфир';
+                btn.className = 'call-btn danger';
+                addSysMsg('Запущена трансляция экрана!');
+            } catch (err) { console.error(err); }
+        } else {
+            endCall();
+        }
+    }
+
+    function handleCallStream(call) {
+        call.on('stream', (remoteStream) => {
+            if (remoteStream.getVideoTracks().length > 0) {
+                document.getElementById('remoteVideo').srcObject = remoteStream;
+            } else {
+                document.getElementById('remoteAudio').srcObject = remoteStream;
+            }
+        });
+        call.on('close', () => endCall());
+    }
+
+    function endCall() {
+        if (callStream) {
+            callStream.getTracks().forEach(t => t.stop());
+            callStream = null;
+        }
+        if (currentCall) {
+            currentCall.close(); currentCall = null;
+        }
+
+        isVoiceActive = false; isScreenSharing = false;
+        document.getElementById('muteMicBtn').style.display = 'none';
+
+        const vBtn = document.getElementById('voiceCallBtn');
+        vBtn.innerText = '📞 Войти в голосовой'; vBtn.className = 'call-btn';
+
+        const sBtn = document.getElementById('screenShareBtn');
+        sBtn.innerText = '🖥️ Запустить трансляцию экрана'; sBtn.className = 'call-btn';
+
+        addSysMsg('Канал связи закрыт.');
+    }
+
+    /* --- Голосовые сообщения --- */
+
+    async function toggleVoiceRecording() {
+        const btn = document.getElementById('voiceBtn');
+        if (!isVoiceRecording) {
+            try {
+                const recordStream = await getAudioStream();
+                voiceMediaRecorder = new MediaRecorder(recordStream);
+                voiceAudioChunks = [];
+
+                voiceMediaRecorder.ondataavailable = e => { if (e.data.size > 0) voiceAudioChunks.push(e.data); };
+                voiceMediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(voiceAudioChunks, { type: 'audio/webm' });
+                    const reader = new FileReader();
+                    reader.readAsDataURL(audioBlob);
+                    reader.onloadend = () => sendMedia('voice', reader.result);
+                    recordStream.getTracks().forEach(t => t.stop());
+                };
+
+                voiceMediaRecorder.start();
+                isVoiceRecording = true;
+                btn.classList.add('recording');
+            } catch (err) { alert('Ошибка записи аудио!'); }
+        } else {
+            if (voiceMediaRecorder && voiceMediaRecorder.state !== 'inactive') voiceMediaRecorder.stop();
+            isVoiceRecording = false;
+            btn.classList.remove('recording');
+        }
+    }
+
+    function sendMedia(kind, content) {
+        if (conn && conn.open) {
+            const payload = { type: 'media', kind: kind, content: content };
+            conn.send(payload);
+            renderMessage(payload, 'me', myProfile);
+            if (kind !== 'voice') toggleMediaPicker();
+        }
+    }
+
+    function renderTags(id, list, icon) {
+        const box = document.getElementById(id); box.innerHTML = '';
+        (list || []).forEach(item => {
+            const tag = document.createElement('div');
+            tag.className = 'tag-chip'; tag.innerText = `${icon} ${item}`;
+            box.appendChild(tag);
+        });
+    }
+
+    /* --- Инициализация связи --- */
+
+    function initPeer() {
+        loadSavedProfile();
+
+        peer = new Peer(fullPeerId, {
+            debug: 1,
+            config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] }
+        });
+
+        peer.on('open', () => document.getElementById('statusText').innerText = 'Готов к связи');
+        peer.on('connection', c => setupConnection(c));
+        peer.on('call', c => { currentCall = c; c.answer(callStream); handleCallStream(c); });
+        peer.on('error', err => { if (err.type === 'unavailable-id') location.reload(); });
+    }
+
+    function connectToPeer() {
+        const targetCode = document.getElementById('peerCodeInput').value.trim();
+        if (targetCode.length !== 6 || targetCode === myCode) return alert('Введите корректный код!');
+        addSysMsg('Соединение с ' + targetCode + '...');
+        setupConnection(peer.connect('kirsche-v12-' + targetCode, { reliable: true }));
+    }
+
+    function setupConnection(c) {
+        conn = c;
+        conn.on('open', () => {
+            document.getElementById('statusText').innerText = 'В сети';
+            addSysMsg('⚡ Канал зашифрован и соединен!');
+            toggleInputs(true);
+            conn.send({ type: 'profile_sync', profile: myProfile });
+        });
+
+        conn.on('data', data => {
+            if (!data) return;
+            if (data.type === 'profile_sync') peerProfile = data.profile;
+            else if (data.type === 'msg') renderMessage(data.text, 'peer', peerProfile);
+            else if (data.type === 'media') renderMessage(data, 'peer', peerProfile);
+        });
+
+        conn.on('close', () => {
+            document.getElementById('statusText').innerText = 'Готов к связи';
+            addSysMsg('Собеседник отключился.');
+            toggleInputs(false); endCall(); conn = null;
+        });
+    }
+
+    function sendMsg() {
+        const input = document.getElementById('msgInput');
+        const text = input.value.trim();
+        if (text && conn && conn.open) {
+            conn.send({ type: 'msg', text: text });
+            renderMessage(text, 'me', myProfile);
+            input.value = '';
+        }
+    }
+
+    function renderMessage(payload, side, profile) {
+        const body = document.getElementById('chatBody');
+        const wrapper = document.createElement('div');
+        wrapper.className = side === 'me' ? 'msg-wrapper me' : 'msg-wrapper peer';
+
+        const now = new Date();
+        const timeStr = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+        let innerContent = '';
+
+        if (typeof payload === 'string') {
+            innerContent = `<div class="bubble">${escapeHtml(payload)}<span class="msg-time">${timeStr}</span></div>`;
+        } else if (payload && payload.type === 'media') {
+            if (payload.kind === 'sticker') {
+                innerContent = `<div class="bubble media-bubble"><span style="font-size: 3.2rem;">${payload.content}</span><span class="msg-time">${timeStr}</span></div>`;
+            } else if (payload.kind === 'gif') {
+                innerContent = `<div class="bubble media-bubble"><img src="${payload.content}" class="media-img" /><span class="msg-time">${timeStr}</span></div>`;
+            } else if (payload.kind === 'voice') {
+                innerContent = `<div class="bubble"><audio controls src="${payload.content}"></audio><span class="msg-time">${timeStr}</span></div>`;
+            }
+        }
+
+        wrapper.innerHTML = `
+            <div class="msg-avatar" onclick="openPeerModal('${side}')">${profile.avatar || '👤'}</div>
+            <div class="msg-content">
+                <div class="msg-author">${escapeHtml(profile.name || 'Аноним')}</div>
+                ${innerContent}
+            </div>
+        `;
+
+        body.appendChild(wrapper);
+        body.scrollTop = body.scrollHeight;
+    }
+
+    function openPeerModal(side) {
+        const target = side === 'me' ? myProfile : peerProfile;
+        document.getElementById('modalAvatar').innerText = target.avatar || '👤';
+        document.getElementById('modalName').innerText = target.name || 'Собеседник';
+        document.getElementById('modalBio').innerText = target.bio || 'Без статуса';
+
+        renderTags('modalGames', target.games || [], '🎮');
+        renderTags('modalHobbies', target.hobbies || [], '⚡');
+
+        document.getElementById('peerModal').classList.add('open');
+        document.getElementById('modalOverlay').classList.add('open');
+    }
+
+    function closeModal() {
+        document.getElementById('peerModal').classList.remove('open');
+        document.getElementById('modalOverlay').classList.remove('open');
+    }
+
+    function addSysMsg(text) {
+        const body = document.getElementById('chatBody');
+        const sys = document.createElement('div');
+        sys.className = 'sys-info'; sys.innerText = text;
+        body.appendChild(sys); body.scrollTop = body.scrollHeight;
+    }
+
+    function toggleInputs(online) {
+        document.getElementById('msgInput').disabled = !online;
+        document.getElementById('sendBtn').disabled = !online;
+        document.getElementById('voiceBtn').disabled = !online;
+        document.getElementById('voiceCallBtn').disabled = !online;
+        document.getElementById('screenShareBtn').disabled = !online;
+        document.getElementById('peerCodeInput').disabled = online;
+        document.getElementById('connectBtn').disabled = online;
+    }
+
+    function copyCode() {
+        navigator.clipboard.writeText(myCode);
+        addSysMsg('Код скопирован!');
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div'); div.innerText = text; return div.innerHTML;
+    }
+
+    initPeer();
+</script>
+</body>
+</html>
