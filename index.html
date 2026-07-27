@@ -195,7 +195,7 @@
         }
         .stream-panel.open { right: 0; }
 
-        /* Мини-режим (Плавающее видео) */
+        /* Мини-режим */
         .stream-panel.pip-mode {
             top: auto; bottom: 70px; right: 12px !important; width: 220px; height: 160px;
             border-radius: 16px; border: 1px solid var(--border); padding: 6px;
@@ -214,7 +214,6 @@
 
         .stream-video-box video { width: 100%; height: 100%; object-fit: contain; }
 
-        /* Оверлей управления поверх видео */
         .video-overlay-controls {
             position: absolute; top: 8px; right: 8px; display: flex; gap: 6px; z-index: 2;
         }
@@ -428,7 +427,7 @@
         </select>
     </div>
 
-    <!-- Компактная панель подключения -->
+    <!-- Панель подключения -->
     <div class="connect-bar">
         <div class="connect-row">
             <div class="room-row">
@@ -445,7 +444,7 @@
     <div class="main-workspace">
         <div class="chat-section">
             <div id="chatBody" class="chat-body">
-                <div class="sys-info">Нажмите на аватар сверху, чтобы открыть профиль.</div>
+                <div class="sys-info">Нажмите на имя/аватар сверху, чтобы настроить свой профиль.</div>
             </div>
 
             <div id="mediaPicker" class="media-picker">
@@ -494,20 +493,15 @@
 
     document.getElementById('myCodeDisplay').innerText = myCode;
 
-    /* --- Полноэкранный режим и PIP --- */
+    /* --- PIP и Fullscreen --- */
 
     function toggleFullscreen() {
         const videoBox = document.getElementById('streamVideoBox');
         if (!document.fullscreenElement) {
-            if (videoBox.requestFullscreen) {
-                videoBox.requestFullscreen();
-            } else if (videoBox.webkitRequestFullscreen) {
-                videoBox.webkitRequestFullscreen();
-            }
+            if (videoBox.requestFullscreen) videoBox.requestFullscreen();
+            else if (videoBox.webkitRequestFullscreen) videoBox.webkitRequestFullscreen();
         } else {
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-            }
+            if (document.exitFullscreen) document.exitFullscreen();
         }
     }
 
@@ -518,10 +512,11 @@
         overlay.classList.remove('open');
     }
 
-    /* --- Работа с микрофоном --- */
+    /* --- Аудиопоток --- */
+
     async function getAudioStream() {
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            throw new Error("Ваш браузер или соединение (HTTP) блокирует доступ к микрофону.");
+            throw new Error("Браузер блокирует микрофон. Откройте сайт по HTTPS.");
         }
         try {
             return await navigator.mediaDevices.getUserMedia({
@@ -543,7 +538,8 @@
         const savedData = localStorage.getItem('kirsche_user_profile_v12');
         if (savedData) {
             try { 
-                myProfile = JSON.parse(savedData); 
+                const parsed = JSON.parse(savedData); 
+                if (parsed && typeof parsed === 'object') myProfile = parsed;
             } catch(e) {}
         }
 
@@ -558,7 +554,7 @@
 
     function saveProfile() {
         const nameVal = document.getElementById('nameInput').value;
-        myProfile.name = nameVal !== '' ? nameVal : 'Пилот';
+        myProfile.name = nameVal.trim() !== '' ? nameVal : 'Пилот';
         
         myProfile.avatar = document.getElementById('avatarInput').value.trim() || '🍒';
         myProfile.bio = document.getElementById('bioInput').value.trim();
@@ -590,7 +586,7 @@
         localStorage.setItem('kirsche_theme_v12', themeName);
     }
 
-    /* --- Управление шторками --- */
+    /* --- Управление панелями --- */
 
     function toggleDrawer(open) {
         document.getElementById('drawer').classList.toggle('open', open);
@@ -663,7 +659,7 @@
                     container.innerHTML = '<div style="font-size:0.75rem; color:var(--text-muted); grid-column:span 2;">Ничего не найдено</div>';
                 }
             } catch (err) {
-                container.innerHTML = '<div style="font-size:0.75rem; color:var(--text-muted); grid-column:span 2;">Ошибка загрузки GIFs</div>';
+                container.innerHTML = '<div style="font-size:0.75rem; color:var(--text-muted); grid-column:span 2;">Ошибка GIFs</div>';
             }
         }, 300);
     }
@@ -688,9 +684,9 @@
                 isMicMuted = false;
                 updateMuteBtnState();
 
-                addSysMsg('Подключено к голосовому каналу.');
+                addSysMsg('Голосовой канал открыт.');
             } catch (err) {
-                alert('Ошибка доступа к микрофону: ' + (err.message || 'Проверьте разрешения браузера'));
+                alert('Ошибка микрофона: ' + err.message);
             }
         } else {
             endCall();
@@ -728,7 +724,7 @@
                 isScreenSharing = true;
                 btn.innerText = '🔴 Стоп эфир';
                 btn.className = 'call-btn danger';
-                addSysMsg('Запущена трансляция экрана!');
+                addSysMsg('Трансляция экрана запущена!');
             } catch (err) { console.error(err); }
         } else {
             endCall();
@@ -789,7 +785,7 @@
                 voiceMediaRecorder.start();
                 isVoiceRecording = true;
                 btn.classList.add('recording');
-            } catch (err) { alert('Ошибка записи аудио!'); }
+            } catch (err) { alert('Ошибка записи!'); }
         } else {
             if (voiceMediaRecorder && voiceMediaRecorder.state !== 'inactive') voiceMediaRecorder.stop();
             isVoiceRecording = false;
@@ -815,26 +811,52 @@
         });
     }
 
-    /* --- Инициализация связи --- */
+    /* --- Инициализация WebRTC (PeerJS + TURN/STUN) --- */
 
     function initPeer() {
         loadSavedProfile();
 
         peer = new Peer(fullPeerId, {
             debug: 1,
-            config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] }
+            config: {
+                iceServers: [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:stun1.l.google.com:19302' },
+                    { urls: 'stun:stun2.l.google.com:19302' },
+                    /* Бесплатные TURN-реле для обхода немецкого Symmetric NAT / CGNAT */
+                    {
+                        urls: 'turn:openrelay.metered.ca:80',
+                        username: 'openrelayproject',
+                        credential: 'openrelayproject'
+                    },
+                    {
+                        urls: 'turn:openrelay.metered.ca:443',
+                        username: 'openrelayproject',
+                        credential: 'openrelayproject'
+                    },
+                    {
+                        urls: 'turn:openrelay.metered.ca:443?transport=tcp',
+                        username: 'openrelayproject',
+                        credential: 'openrelayproject'
+                    }
+                ]
+            }
         });
 
         peer.on('open', () => document.getElementById('statusText').innerText = 'Готов к связи');
         peer.on('connection', c => setupConnection(c));
         peer.on('call', c => { currentCall = c; c.answer(callStream); handleCallStream(c); });
-        peer.on('error', err => { if (err.type === 'unavailable-id') location.reload(); });
+        peer.on('error', err => {
+            console.error('PeerJS Error:', err);
+            addSysMsg('Ошибка соединения: ' + (err.type || 'unknown'));
+            if (err.type === 'unavailable-id') setTimeout(() => location.reload(), 1500);
+        });
     }
 
     function connectToPeer() {
         const targetCode = document.getElementById('peerCodeInput').value.trim();
-        if (targetCode.length !== 6 || targetCode === myCode) return alert('Введите корректный код!');
-        addSysMsg('Соединение с ' + targetCode + '...');
+        if (targetCode.length !== 6 || targetCode === myCode) return alert('Введите корректный 6-значный код!');
+        addSysMsg('Подключение к ' + targetCode + '...');
         setupConnection(peer.connect('kirsche-v12-' + targetCode, { reliable: true }));
     }
 
@@ -842,7 +864,7 @@
         conn = c;
         conn.on('open', () => {
             document.getElementById('statusText').innerText = 'В сети';
-            addSysMsg('⚡ Канал зашифрован и соединен!');
+            addSysMsg('⚡ Соединение установлено!');
             toggleInputs(true);
             conn.send({ type: 'profile_sync', profile: myProfile });
         });
